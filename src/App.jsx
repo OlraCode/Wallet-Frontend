@@ -1,19 +1,32 @@
+import { useEffect, useState } from "react"
 import Form from "./components/Form"
 import Transaction from "./components/Transaction"
+import api from "./services/api"
 
 function App() {
+
+  const [transactions, setTransactions] = useState([])
+  const [transactionEdit, setTransactionEdit] = useState({})
+
+  async function getTransactions() {
+    let transactions = await api.get('/transaction')
+    setTransactions(transactions.data)
+  }
+
+  useEffect(() => {
+    getTransactions()
+  }, [])
 
   return (
       <div className="bg-white w-screen max-w-150 mt-3 m-auto rounded-md shadow-md px-8 py-4">
         <h1 className="text-3xl text-center font-semibold">Wallet</h1>
 
-        <Form />
+        <Form onCreateTransaction={getTransactions} transaction={transactionEdit} onEdit={() => setTransactionEdit({})}/>
 
         <div className="mt-8">
-          <Transaction description="Testeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" value="40,89" type="income"/>
-          <Transaction description="Compra de uma televisão 80 polegadas das Casas Bahia" value="89,00" type="income"/>
-          <Transaction description="Outro" value="50,00" type="expense"/>
-          <Transaction description="Outro" value="40,00" type="expense"/>
+          {transactions.map((item) => (
+            <Transaction value={item.value} type={item.type} description={item.description} id={item.id} key={item.id} onDelete={getTransactions} onEdit={setTransactionEdit} />
+          ))}
         </div>
       </div>
 
